@@ -3,7 +3,7 @@ async function cotarFrete(cep) {
 
   try {
     const response = await fetch(
-      `https://melhorenvio.com.br/api/v2/calculator?from=88350665&to=${cepNormalizado}`
+      `https://melhorenvio.com.br/api/v2/calculator?from=88317650&to=${cepNormalizado}`
     );
     const data = await response.json();
     const idCompanias = [1, 2, 3]; // PAC | PAC Centralizado | JadLog
@@ -18,15 +18,21 @@ async function cotarFrete(cep) {
         frete.price
       ).toLocaleString("pt-br", { minimumFractionDigits: 2 })} (_${
         frete.name
-      } - ${frete.delivery_range.min} - ${
-        frete.delivery_range.max
+      } - ${frete.delivery_range?.min} - ${
+        frete.delivery_range?.max
       } dias úteis_)\n`;
     });
 
     return retorno;
   } catch (error) {
-    console.error(error)
-    return 'Falha na busca dos Valores de Frete!'
+    console.error(error);
+    throw new Error(
+      `🚫 Opa!
+Parece que occoreu um problema na busca.
+Verifique o número do cep informado, e tente novamente. 
+
+_Lembrando que devem ser apenas números !_`
+    );
   }
 }
 
