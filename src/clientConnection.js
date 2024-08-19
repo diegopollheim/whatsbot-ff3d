@@ -6,7 +6,6 @@ const {
   removeClientStage,
 } = require("./store/clientStage");
 
-
 let expires = 10 * 1000; // 10 seg
 // let expires = 60 * 60 * 1000 // 1 hora
 let timer;
@@ -48,8 +47,15 @@ async function onMessageReveived(message) {
       break;
     case 1:
       let cep = msg;
-      const result = await cotarFrete(cep);
-      chat.sendMessage(result);
+      const resultCotacao = await cotarFrete(cep);
+
+      let messageRetorno = `
+Encontrei os seguintes valores para a sua região!
+\n
+${resultCotacao}      
+      `;
+
+      chat.sendMessage(messageRetorno);
       break;
   }
 }
