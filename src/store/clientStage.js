@@ -8,6 +8,7 @@ function getStageClient(from) {
 
 function setStageClient(from, stage) {
   clients[from] = {
+    from: from,
     stage: stage,
   };
 }
