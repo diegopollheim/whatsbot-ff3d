@@ -1,76 +1,83 @@
-const mensagens = require("./constants/mensagens");
-const etapas = require("./constants/etapas");
-const { getValoresFreteByCEP } = require("./melhor-envio/getValoresFrete");
-const { User } = require("./models/client");
+const path = require("path");
+const { MessageMedia } = require("whatsapp-web.js");
+const { cotarFrete } = require("./melhor-envio/frete");
+const stages = require("./stages");
+const {
+  getStageClient,
+  setStageClient,
+  removeClientStage,
+} = require("./store/clientStage");
 
-async function onMessageReveived(response) {
-  const chat = await response.getChat();
-  if (chat.isGroupisGroup) return; // se for grupo encerra
+let expires = 30 * 1000; // 30 seg
+// let expires = 60 * 60 * 1000 // 1 hora
+let timer;
 
-  let msg = response.body;
+async function onMessageReveived(message) {
+  let msg = message.body;
+  let from = message.from;
 
-  // Verificar se usuário existe na base de dados
-  const user = await User.findByPk(response.from);
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    console.log("> Reset Stage Client");
+    removeClientStage(from);
+  }, expires);
 
-  if (user) {
-    if (user.etapa == etapas.BOAS_VINDAS) {
-      let opcao = msg;
+  const chat = await message.getChat();
+  if (chat.isGroup) return; // se for grupo encerra
 
-      console.log('opcao', opcao)
-      if (opcao !== '1' || opcao !== '2') {
-        return chat.sendMessage(mensagens.OPCAO_INVALIDA);
-      }
+  let clientWhats = getStageClient(from);
+  console.log("> Client Whats", clientWhats);
 
-      switch (opcao) {
-        case '1':
-          await User.update(
-            { etapa: etapas.AGUARDANDO_CEP },
-            {
-              where: {
-                id: user.id,
-              },
-            }
-          );
-
-          chat.sendMessage(mensagens.AGUARDANDO_CEP);
-          break;
-
-        case '2':
-          await User.update(
-            { etapa: etapas.FALAR_COM_ATENDENTE },
-            {
-              where: {
-                id: user.id,
-              },
-            }
-          );
-
-          chat.sendMessage(mensagens.FALAR_COM_ATENDENTE);
-          break;
-      }
-    }
+  if (!clientWhats) {
+    chat.sendMessage(stages[0]);
+    setStageClient(from, 0);
+    return;
   }
 
-  // Cria um novo usuário
-  if (!user) {
-    const userCreated = await User.create({
-      id: response.from,
-      name: response.notifyName,
-      phone: response.from.split("@").shift(),
-      etapa: etapas.BOAS_VINDAS,
-    });
+  switch (clientWhats.stage) {
+    case 0:
+      let op = parseInt(msg);
 
-    console.log("Novo cliente cadastrado > ", userCreated);
+      // Solicita Cep
+      if (op == 1) {
+        chat.sendMessage(stages[1]);
+        setStageClient(from, 1);
+      }
 
-    return chat.sendMessage(mensagens.BOAS_VINDAS);
+      // Envia tabela de valores
+      if (op == 2) {
+        const filePath = path.join(__dirname, "assets", "tabela-valores.png");
+        const media = MessageMedia.fromFilePath(filePath);
+        await chat.sendMessage(media);
+        setStageClient(from, 2);
+      }
+
+      // Transfere atendente
+      if (op == 3) {
+        chat.sendMessage(stages[3]);
+        setStageClient(from, 3);
+      }
+      break;
+    case 1:
+      let cep = msg;
+
+      try {
+        const resultCotacao = await cotarFrete(cep);
+        let messageRetorno = `🤖
+Encontrei os seguintes valores para a sua região!
+\n
+${resultCotacao}
+
+🚚💨💨💨
+              `;
+
+        chat.sendMessage(messageRetorno);
+      } catch (error) {
+        chat.sendMessage(error.message);
+      }
+
+      break;
   }
-
-  // Se nao existir, criar usuário e dar boas vindas
-
-  // const valoresFrete = await getValoresFreteByCEP(msg);
-  // return chat.sendMessage(
-  //   `Valores encontrados para sua Região:\n\n ${valoresFrete}`
-  // );
 }
 
 module.exports = {

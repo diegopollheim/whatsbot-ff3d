@@ -1,7 +1,6 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 const { onMessageReveived } = require("./clientConnection");
-const { User } = require('./models/client')
 
 // Create a new client instance
 const client = new Client({
@@ -25,7 +24,7 @@ client.on("qr", (qr) => {
 });
 
 // Received messages
-client.on("message_create", onMessageReveived);
+client.on("message", onMessageReveived);
 
 // Start your client
 client.initialize();
