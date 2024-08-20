@@ -65,11 +65,11 @@ async function onMessageReveived(message) {
       if (op == 2) {
         const pathImages = path.resolve(__dirname + "/assets");
         fs.readdirSync(pathImages).forEach(async (file) => {
-          const pathFile = path.resolve(__dirname + "/assets/"+ file);
+          const pathFile = path.resolve(__dirname + "/assets/" + file);
 
+          console.log("> Enviando: ", file);
           const media = MessageMedia.fromFilePath(pathFile);
           await chat.sendMessage(media);
-          console.log("pathFile", pathFile);
         });
 
         removeClientStage(from);
