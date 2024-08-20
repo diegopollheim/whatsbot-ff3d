@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const { MessageMedia } = require("whatsapp-web.js");
 const { cotarFrete } = require("./melhor-envio/frete");
@@ -7,10 +8,14 @@ const {
   setStageClient,
   removeClientStage,
 } = require("./store/clientStage");
+const { type } = require("os");
 
 let expires = 30 * 1000; // 30 seg
 // let expires = 60 * 60 * 1000 // 1 hora
 let timer;
+
+let ADMIN_PHONE_NUMBER = "55479177489";
+let BOT_ACTIVE = true;
 
 async function onMessageReveived(message) {
   let msg = message.body;
@@ -25,6 +30,17 @@ async function onMessageReveived(message) {
   const chat = await message.getChat();
   if (chat.isGroup) return; // se for grupo encerra
 
+  if (from.includes(ADMIN_PHONE_NUMBER)) {
+    if (msg.includes("/bot")) {
+      let ativarBot = msg.split("/bot")[1];
+      BOT_ACTIVE = ativarBot == " true";
+      console.log("> Bot Ativo:", BOT_ACTIVE);
+    }
+    return;
+  }
+
+  if (!BOT_ACTIVE) return;
+
   let clientWhats = getStageClient(from);
   console.log("> Client Whats", clientWhats);
 
@@ -37,6 +53,7 @@ async function onMessageReveived(message) {
   switch (clientWhats.stage) {
     case 0:
       let op = parseInt(msg);
+      console.log("> Op: ", op);
 
       // Solicita Cep
       if (op == 1) {
@@ -44,12 +61,18 @@ async function onMessageReveived(message) {
         setStageClient(from, 1);
       }
 
-      // Envia tabela de valores
+      // Envia tabela de valores // Multiplas imagens
       if (op == 2) {
-        const filePath = path.join(__dirname, "assets", "tabela-valores.png");
-        const media = MessageMedia.fromFilePath(filePath);
-        await chat.sendMessage(media);
-        setStageClient(from, 2);
+        const pathImages = path.resolve(__dirname + "/assets");
+        fs.readdirSync(pathImages).forEach(async (file) => {
+          const pathFile = path.resolve(__dirname + "/assets/" + file);
+
+          console.log("> Enviando: ", file);
+          const media = MessageMedia.fromFilePath(pathFile);
+          await chat.sendMessage(media);
+        });
+
+        removeClientStage(from);
       }
 
       // Transfere atendente
@@ -74,6 +97,8 @@ ${resultCotacao}
         chat.sendMessage(messageRetorno);
       } catch (error) {
         chat.sendMessage(error.message);
+      } finally {
+        removeClientStage(from);
       }
 
       break;
