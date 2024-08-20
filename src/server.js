@@ -24,7 +24,7 @@ client.on("qr", (qr) => {
 });
 
 // Received messages
-client.on("message", onMessageReveived);
+client.on("message_create", onMessageReveived);
 
 // Start your client
 client.initialize();

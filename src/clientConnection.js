@@ -12,6 +12,9 @@ let expires = 30 * 1000; // 30 seg
 // let expires = 60 * 60 * 1000 // 1 hora
 let timer;
 
+let ADMIN_PHONE_NUMBER = "55479177489";
+let BOT_ACTIVE = false;
+
 async function onMessageReveived(message) {
   let msg = message.body;
   let from = message.from;
@@ -25,6 +28,17 @@ async function onMessageReveived(message) {
   const chat = await message.getChat();
   if (chat.isGroup) return; // se for grupo encerra
 
+  if (from.includes(ADMIN_PHONE_NUMBER)) {
+    if (msg.includes("/bot")) {
+      let ativarBot = msg.split("/bot")[1];
+      BOT_ACTIVE = ativarBot
+      console.log('> Bot Ativo:', BOT_ACTIVE)
+    }
+    return
+  }
+
+  if (!BOT_ACTIVE) return
+
   let clientWhats = getStageClient(from);
   console.log("> Client Whats", clientWhats);
 
@@ -37,6 +51,7 @@ async function onMessageReveived(message) {
   switch (clientWhats.stage) {
     case 0:
       let op = parseInt(msg);
+      console.log("> Op: ", op);
 
       // Solicita Cep
       if (op == 1) {
@@ -49,7 +64,7 @@ async function onMessageReveived(message) {
         const filePath = path.join(__dirname, "assets", "tabela-valores.png");
         const media = MessageMedia.fromFilePath(filePath);
         await chat.sendMessage(media);
-        setStageClient(from, 2);
+        removeClientStage(from);
       }
 
       // Transfere atendente
@@ -74,6 +89,8 @@ ${resultCotacao}
         chat.sendMessage(messageRetorno);
       } catch (error) {
         chat.sendMessage(error.message);
+      } finally {
+        removeClientStage(from);
       }
 
       break;
