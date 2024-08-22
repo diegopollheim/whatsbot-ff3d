@@ -10,6 +10,10 @@ const client = new Client({
     remotePath:
       "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
   },
+
+  puppeteer:{
+    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+  }
 });
 
 // Client is ready!
