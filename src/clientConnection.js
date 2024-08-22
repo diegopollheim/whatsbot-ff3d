@@ -8,7 +8,6 @@ const {
   setStageClient,
   removeClientStage,
 } = require("./store/clientStage");
-const { type } = require("os");
 
 let expires = 30 * 1000; // 30 seg
 // let expires = 60 * 60 * 1000 // 1 hora
