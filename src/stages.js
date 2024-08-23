@@ -17,8 +17,13 @@ que eu já te informo os valores combinado!
 
   2: `Tabelas de valores`,
   3: `
+📝 Certo, vamos lá!
+Explique em algumas palavras qual é a sua dúvida.
+`,
+4: `
 🕒 Tudo bem!
-Já estou te transferindo para um atendente, agora é só aguardar!
+
+Eu anotei aqui as suas dúvidas, agora é só aguardar!
 Iremos lhe atender o mais rápido possivel
 
 Ficamos felizes em ter você aqui com a gente 🌟

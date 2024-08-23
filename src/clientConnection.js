@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { createRegistro } = require("./db");
 const { MessageMedia } = require("whatsapp-web.js");
 const { cotarFrete } = require("./melhor-envio/frete");
 const stages = require("./stages");
@@ -8,12 +9,13 @@ const {
   setStageClient,
   removeClientStage,
 } = require("./store/clientStage");
+require("dotenv").config();
 
-let expires = 30 * 1000; // 30 seg
-// let expires = 60 * 60 * 1000 // 1 hora
+
+let expires = 60 * 60 * 1000 // 1 hora
 let timer;
 
-let ADMIN_PHONE_NUMBER = "55479177489";
+let ADMIN_PHONE_NUMBER = process.env.ADMIN_PHONE_NUMBER;
 let BOT_ACTIVE = true;
 
 async function onMessageReveived(message) {
@@ -34,6 +36,9 @@ async function onMessageReveived(message) {
       let ativarBot = msg.split("/bot")[1];
       BOT_ACTIVE = ativarBot == " true";
       console.log("> Bot Ativo:", BOT_ACTIVE);
+      chat.sendMessage(
+        `${BOT_ACTIVE ? "✅ Bot Ativado" : "🚫 Bot Desativado"}`
+      );
     }
     return;
   }
@@ -100,6 +105,18 @@ ${resultCotacao}
         removeClientStage(from);
       }
 
+      break;
+
+    case 3:
+      chat.sendMessage(stages[4]);
+      setStageClient(from, 4);
+
+      // Salvar registro para consulta futura
+      createRegistro({
+        name: chat.name,
+        phone: from.split('@')[0],
+        message: msg
+      })
       break;
   }
 }
