@@ -6,3 +6,4 @@
 yarn.lock
 /src/assets
 src/database/db.json
+.env
