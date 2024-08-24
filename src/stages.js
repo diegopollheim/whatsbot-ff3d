@@ -18,6 +18,7 @@ que eu já te informo os valores combinado!
   2: `Tabelas de valores`,
   3: `
 📝 Certo, vamos lá!
+
 Explique em algumas palavras qual é a sua dúvida.
 `,
 4: `

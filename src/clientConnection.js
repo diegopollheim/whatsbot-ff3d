@@ -9,10 +9,10 @@ const {
   setStageClient,
   removeClientStage,
 } = require("./store/clientStage");
+const isNumeric = require("./utils/isNumeric");
 require("dotenv").config();
 
-
-let expires = 60 * 60 * 1000 // 1 hora
+let expires = 60 * 60 * 1000; // 1 hora
 let timer;
 
 let ADMIN_PHONE_NUMBER = process.env.ADMIN_PHONE_NUMBER;
@@ -58,6 +58,12 @@ async function onMessageReveived(message) {
     case 0:
       let op = parseInt(msg);
       console.log("> Op: ", op);
+      
+      // Opcão inválida
+      if (op > 3 || !isNumeric(msg)) {
+        chat.sendMessage("⚠️ Opção Inválida!\n\n_🤖 Digite uma opção válida_");
+        return;
+      }
 
       // Solicita Cep
       if (op == 1) {
@@ -114,9 +120,9 @@ ${resultCotacao}
       // Salvar registro para consulta futura
       createRegistro({
         name: chat.name,
-        phone: from.split('@')[0],
-        message: msg
-      })
+        phone: from.split("@")[0],
+        message: msg,
+      });
       break;
   }
 }

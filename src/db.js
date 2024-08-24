@@ -88,10 +88,10 @@ function createRegistro(newItem) {
       // Escrever o conteúdo atualizado de volta ao arquivo
       fs.writeFile(filePath, updatedData, "utf8", (err) => {
         if (err) {
-          console.error("Erro ao escrever o arquivo:", err);
-        } else {
-          console.log("Arquivo atualizado com sucesso.");
+          console.error("Erro ao salvar registro:", err);
+          return;
         }
+        console.log("> Registro salvo com sucesso");
       });
     });
   });
