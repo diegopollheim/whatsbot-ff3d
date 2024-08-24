@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { createRegistro } = require("./db");
+const createRegistro = require("./db");
 const { MessageMedia } = require("whatsapp-web.js");
 const { cotarFrete } = require("./melhor-envio/frete");
 const stages = require("./stages");
